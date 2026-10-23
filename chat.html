@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+<meta name="theme-color" content="#0a1224">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Connective">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="robots" content="noindex">
+<link rel="manifest" href="chat-manifest.json">
+<link rel="icon" href="chat-192.png">
+<link rel="apple-touch-icon" href="chat-apple-180.png">
+<title>Connective</title>
+<style>
+:root{--bg:#0a1224;--pan:#0f1a33;--card:#15223f;--line:#243556;--fg:#eaf0fa;--mute:#8a9bb8;--acc:#34e0a1;--accd:#12385a;--in:#18274a;--bad:#ff6b6b;--warn:#f2b84b;--b1:#1d4fc4;--b2:#17877a;color-scheme:dark}
+[hidden]{display:none!important}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overscroll-behavior:none}
+.scr{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg);padding-top:env(safe-area-inset-top)}
+.scr[hidden]{display:none}
+header{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--pan);border-bottom:1px solid var(--line);min-height:56px}
+header h1{font-size:19px;margin:0;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+header .sub{font-size:12px;color:var(--mute);font-weight:400;display:block}
+.ib{background:transparent;border:0;color:var(--fg);width:44px;height:44px;border-radius:22px;font-size:21px;cursor:pointer;display:grid;place-items:center}
+.ib:active{background:var(--card)}
+.ib:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.body{flex:1;overflow:auto;padding:12px;-webkit-overflow-scrolling:touch}
+.row{display:flex;align-items:center;gap:12px;padding:12px 8px;border-bottom:1px solid var(--line);cursor:pointer}
+.av{width:46px;height:46px;border-radius:23px;background:var(--accd);color:#fff;display:grid;place-items:center;font-weight:700;font-size:19px;flex:none}
+.row .t{flex:1;min-width:0}.row b{display:block}.row small{color:var(--mute);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.badge{background:var(--acc);color:#04251d;border-radius:12px;min-width:24px;padding:1px 7px;font-size:13px;font-weight:700;text-align:center}
+.fab{position:fixed;right:18px;bottom:calc(env(safe-area-inset-bottom) + 18px);background:var(--acc);color:#04251d;border:0;border-radius:28px;padding:15px 22px;font:inherit;font-weight:700;box-shadow:0 6px 18px #0009;cursor:pointer}
+.fab:active{transform:scale(.97)}
+.btn{font:inherit;font-weight:700;color:#04251d;background:var(--acc);border:0;border-radius:12px;padding:12px 16px;cursor:pointer}
+.btn.s{background:transparent;color:var(--fg);border:1px solid var(--line);font-weight:600}
+.btn.bad{background:transparent;color:var(--bad);border:1px solid #5a2a2e}
+.btn:disabled{opacity:.5}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h2{margin:0 0 8px;font-size:16px}
+label{display:block;font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.07em;margin:10px 0 6px}
+input[type=text],input[type=password],input[type=url],input[type=number],textarea{width:100%;font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px}
+.note{font-size:13px;color:var(--mute);margin:6px 0}
+.warn{color:var(--warn)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.link{word-break:break-all;font:12px ui-monospace,Menlo,monospace;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;max-height:90px;overflow:auto}
+#msgs{display:flex;flex-direction:column;gap:6px;background:var(--bg)}
+.m{max-width:82%;padding:8px 11px;border-radius:14px;white-space:pre-wrap;word-wrap:break-word;overflow-wrap:anywhere}
+.m.o{align-self:flex-end;background:linear-gradient(135deg,var(--b1),var(--b2));color:#fff;border-bottom-right-radius:4px}
+.m.i{align-self:flex-start;background:var(--in);border-bottom-left-radius:4px}
+.m small{display:block;text-align:right;font-size:11px;color:var(--mute);margin-top:2px}
+.m.o small{color:#ffffffb8}
+.m.sys{align-self:center;background:transparent;color:var(--mute);font-size:13px;text-align:center}
+.m.o.fail small{color:#ffd1d1}.m.fail{outline:1px solid var(--bad)}
+.comp{display:flex;gap:8px;padding:8px 10px calc(env(safe-area-inset-bottom) + 8px);background:var(--pan);border-top:1px solid var(--line);align-items:flex-end}
+.comp textarea{flex:1;max-height:120px;resize:none;border-radius:20px;padding:10px 14px}
+.send{background:var(--acc);color:#04251d;border:0;border-radius:24px;width:48px;height:48px;font-size:20px;cursor:pointer;flex:none;transition:opacity .15s,transform .1s}
+.send:disabled{opacity:.4}.send:active:not(:disabled){transform:scale(.92)}
+.req{background:var(--card);border:1px solid var(--warn);border-radius:12px;padding:10px;margin:8px 0}
+#call{background:#000;z-index:20;padding-top:0}
+#lock{background:radial-gradient(120% 80% at 50% 0%,#16306b 0%,var(--bg) 60%)}
+#rv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
+#lv{position:absolute;right:12px;top:calc(env(safe-area-inset-top) + 12px);width:96px;height:136px;object-fit:cover;border-radius:12px;border:2px solid #fff4;background:#111;z-index:2;transform:scaleX(-1)}
+#lv.back{transform:none}
+.cinfo{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top) + 18px);text-align:center;z-index:1;text-shadow:0 1px 6px #000}
+.cinfo b{font-size:24px;display:block}
+.cbar{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 28px);display:flex;justify-content:center;gap:11px;z-index:3;flex-wrap:wrap}
+.cb{width:56px;height:56px;border-radius:31px;border:0;background:#fff3;color:#fff;font-size:24px;cursor:pointer;backdrop-filter:blur(6px)}
+.cb.on{background:#fff;color:#000}.cb.end{background:#e5484d}.cb.acc{background:#2bd37d;color:#04251d}
+.avbig{position:absolute;inset:0;display:grid;place-items:center;background:#0b141a}
+.avbig .av{width:120px;height:120px;border-radius:60px;font-size:52px}
+#inc{background:#0a1224f2;z-index:55;align-items:center;justify-content:center;text-align:center;gap:20px}
+#lock{z-index:50;align-items:center;justify-content:center;gap:12px;padding:24px}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#000d;color:#fff;padding:10px 16px;border-radius:20px;font-size:14px;z-index:60;max-width:88%;text-align:center}
+#toast[hidden]{display:none}
+dialog{background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:16px;max-width:92vw;width:380px}
+dialog::backdrop{background:#000a}
+.sn{font:600 20px ui-monospace,Menlo,monospace;letter-spacing:.06em;text-align:center;line-height:1.7;color:var(--acc)}
+.empty{text-align:center;color:var(--mute);padding:56px 24px}
+.empty img{width:92px;height:92px;border-radius:24px;margin-bottom:14px;box-shadow:0 8px 28px #0007}
+.empty b{display:block;color:var(--fg);font-size:18px;margin-bottom:6px}
+.logo{width:34px;height:34px;border-radius:9px;flex:none}
+.hero{width:104px;height:104px;border-radius:27px;display:block;margin:28px auto 12px;box-shadow:0 10px 34px #0008}
+.row .meta{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex:none}.row .meta time{font-size:12px;color:var(--mute)}
+.row:active{background:var(--card)}
+.day{align-self:center;background:var(--card);color:var(--mute);font-size:12px;padding:3px 12px;border-radius:12px;margin:8px 0 4px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:4px;background:var(--mute);margin-right:5px}.dot.on{background:var(--acc)}
+.scr:not(#call):not(#inc):not(#lock){animation:fi .18s ease-out}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.scr{animation:none!important}}
+</style>
+</head>
+<body>
+
+<!-- PIN lock -->
+<section class="scr" id="lock" hidden>
+  <img class="hero" src="chat-192.png" alt="">
+  <h1 style="margin:0">Connective</h1>
+  <p class="note" id="lockmsg">Enter your PIN</p>
+  <input type="password" id="lockpin" inputmode="numeric" autocomplete="off" style="max-width:220px;text-align:center;font-size:24px" aria-label="PIN">
+  <button class="btn" id="lockok" type="button">Open</button>
+</section>
+
+<!-- first run -->
+<section class="scr" id="setup" hidden>
+  <div class="body">
+    <img class="hero" src="chat-192.png" alt="">
+    <h1 style="margin:0 0 4px;text-align:center">Connective</h1>
+    <p class="note" id="invite" hidden style="color:var(--acc);text-align:center"></p>
+    <p class="note">Private messages, voice calls and video calls for your family. Nobody in the middle can read them.</p>
+    <label for="myname">Your name (your family will see this)</label>
+    <input type="text" id="myname" autocomplete="off" maxlength="30" placeholder="e.g. Fauzan">
+    <div class="btns"><button class="btn" id="setupok" type="button">Start</button></div>
+    <p class="note">A secret key is made on this phone. It never leaves the phone. If you clear this browser's data or lose the phone, your family must add you again.</p>
+  </div>
+</section>
+
+<!-- chat list -->
+<section class="scr" id="list" hidden>
+  <header><img class="logo" src="chat-192.png" alt=""><h1>Connective<span class="sub"><i class="dot" id="cdot"></i><span id="conn">connecting…</span></span></h1>
+    <button class="ib" id="toSettings" type="button" aria-label="Settings">⚙</button></header>
+  <div class="body" id="rows"></div>
+  <button class="fab" id="toAdd" type="button">+ Add person</button>
+</section>
+
+<!-- add person -->
+<section class="scr" id="add" hidden>
+  <header><button class="ib back" type="button" aria-label="Back">←</button><h1>Add a person</h1></header>
+  <div class="body">
+    <div class="card"><h2>1. Send your link to your family</h2>
+      <p class="note">Send this link on WhatsApp or SMS, only to people you trust. When they open it, they can ask to chat with you and you approve.</p>
+      <div class="link" id="mylink"></div>
+      <div class="btns"><button class="btn" id="sharelink" type="button">Send link</button><button class="btn s" id="copylink" type="button">Copy</button></div>
+    </div>
+    <div class="card"><h2>2. Got a link from someone?</h2>
+      <p class="note">Opening their link in this app adds them automatically. Or paste it here:</p>
+      <input type="url" id="pastelink" placeholder="Paste their link" autocomplete="off">
+      <div class="btns"><button class="btn" id="addbtn" type="button">Add</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- chat -->
+<section class="scr" id="chat" hidden>
+  <header><button class="ib back" type="button" aria-label="Back">←</button>
+    <h1 id="ctitle">Name<span class="sub" id="csub"></span></h1>
+    <button class="ib" id="cvoice" type="button" aria-label="Voice call">📞</button>
+    <button class="ib" id="cvideo" type="button" aria-label="Video call">🎥</button>
+    <button class="ib" id="cmenu" type="button" aria-label="Security and options">🔒</button></header>
+  <div class="body" id="cbody"><div id="reqbox"></div><div id="msgs"></div></div>
+  <div class="comp"><textarea id="txt" rows="1" placeholder="Message" aria-label="Message"></textarea><button class="send" id="send" type="button" aria-label="Send">➤</button></div>
+</section>
+
+<!-- settings -->
+<section class="scr" id="settings" hidden>
+  <header><button class="ib back" type="button" aria-label="Back">←</button><h1>Settings</h1></header>
+  <div class="body">
+    <div class="card"><h2>Your name</h2><input type="text" id="setname" maxlength="30" autocomplete="off">
+      <div class="btns"><button class="btn s" id="savename" type="button">Save name</button></div></div>
+    <div class="card"><h2>App lock (PIN)</h2>
+      <p class="note">Asks for a PIN when the app opens. It stops someone who picks up your phone.</p>
+      <input type="password" id="newpin" inputmode="numeric" placeholder="New PIN (4 to 8 digits)" autocomplete="off">
+      <div class="btns"><button class="btn s" id="setpin" type="button">Set PIN</button><button class="btn s" id="nopin" type="button">Remove PIN</button></div></div>
+    <div class="card"><h2>Install on your phone</h2>
+      <p class="note" id="instnote">In Chrome: tap ⋮ (menu), then <b>Install app</b> or <b>Add to Home screen</b>.</p>
+      <div class="btns"><button class="btn" id="install" type="button" hidden>Install app</button><button class="btn s" id="notif" type="button">Allow notifications</button></div></div>
+    <div class="card"><h2>Ring me when the app is closed</h2>
+      <p class="note">Your phone shows a real notification for calls and messages even when Connective is closed. No extra app needed. It needs a free relay, one person sets it up (see PUSH-SETUP.md) and everyone uses the same address.</p>
+      <label for="pushurl">Relay address</label>
+      <input type="url" id="pushurl" placeholder="https://connective-push.yourname.workers.dev" autocomplete="off">
+      <div class="btns"><button class="btn" id="pushon" type="button">Turn on</button><button class="btn s" id="pushoff" type="button" hidden>Turn off</button></div>
+      <p class="note" id="pushstat"></p>
+      <p class="note">iPhone: first tap Share, then Add to Home Screen, and open Connective from there.</p>
+      <details style="margin-top:10px"><summary class="note" style="cursor:pointer">Other way: ntfy app</summary>
+      <p class="note">Without this, the other person's phone only rings while Connective is open. To get a real ring even when it is closed, install the free <b>ntfy</b> app (Play Store or App Store) and follow these steps.</p>
+      <label style="display:flex;gap:10px;align-items:center;text-transform:none;font-size:15px;color:var(--fg);margin:0"><input type="checkbox" id="wakeon" style="width:22px;height:22px"> Let my contacts ring my phone</label>
+      <ol class="note" style="padding-left:20px"><li>Install <b>ntfy</b> and open it.</li><li>Tap <b>+</b>, paste this topic name exactly, and subscribe:</li></ol>
+      <div class="link" id="wakeid">turn it on first</div>
+      <div class="btns"><button class="btn s" id="wakecopy" type="button">Copy topic</button></div>
+      <p class="note">3. In your phone settings, allow ntfy notifications and sound. Then tap a "calling" notification to open the call.</p>
+      <p class="note warn">Privacy: this tells the free ntfy server that someone is calling you (their name and the time). Chats and calls stay locked.</p></details></div>
+    <div class="card"><h2>Calls that will not connect</h2>
+      <label style="display:flex;gap:10px;align-items:center;text-transform:none;font-size:15px;color:var(--fg);margin:0"><input type="checkbox" id="usepub" style="width:22px;height:22px"> Use the free public relay</label>
+      <p class="note">Some phone networks block direct calls. A relay passes the call along. It still cannot hear it, the call stays encrypted. The free public one is not always reliable.</p>
+      <div class="btns"><button class="btn" id="nettest" type="button">Check my network</button></div>
+      <div class="link" id="netres" hidden></div>
+      <label for="mapp">Free relay account (recommended if calls fail on Wi-Fi)</label>
+      <p class="note">Make a free account at <b>metered.ca</b> (20 GB of relay a month). Open Dashboard, then TURN Server, and copy your app name (the part before .metered.live) and the API key. Paste them here. Only one of you needs this.</p>
+      <input type="text" id="mapp" placeholder="App name, e.g. myapp" autocomplete="off">
+      <input type="password" id="mkey" placeholder="API key" style="margin-top:6px" autocomplete="off">
+      <label for="turnurl">Or your own relay (optional)</label>
+      <input type="text" id="turnurl" placeholder="turn:host:3478" autocomplete="off">
+      <input type="text" id="turnuser" placeholder="Username" style="margin-top:6px" autocomplete="off">
+      <input type="password" id="turnpass" placeholder="Password" style="margin-top:6px" autocomplete="off">
+      <div class="btns"><button class="btn s" id="saveturn" type="button">Save relay settings</button></div></div>
+    <div class="card"><h2>Message server</h2>
+      <p class="note">Only locked (encrypted) messages go through it. Leave as it is unless you run your own.</p>
+      <input type="url" id="srv" autocomplete="off"><div class="btns"><button class="btn s" id="savesrv" type="button">Save</button></div></div>
+    <div class="card"><h2>Danger zone</h2>
+      <div class="btns"><button class="btn bad" id="wipe" type="button">Erase everything on this phone</button></div></div>
+    <p class="note" id="myid"></p>
+  </div>
+</section>
+
+<!-- call -->
+<section class="scr" id="call" hidden>
+  <div class="avbig" id="avbig"><div class="av" id="callav">?</div></div>
+  <video id="rv" autoplay playsinline style="visibility:hidden"></video>
+  <video id="lv" autoplay playsinline muted hidden></video>
+  <div class="cinfo"><b id="cname">Name</b><span id="cstat">Calling…</span></div>
+  <div class="cbar">
+    <button class="cb" id="bmute" type="button" aria-label="Mute microphone">🎙</button>
+    <button class="cb" id="bcam" type="button" aria-label="Camera on or off">📷</button>
+    <button class="cb" id="bspk" type="button" aria-label="Speaker or ear speaker">🔊</button>
+    <button class="cb" id="bflip" type="button" aria-label="Switch camera">🔄</button>
+    <button class="cb end" id="bend" type="button" aria-label="End call">✕</button>
+  </div>
+</section>
+
+<section class="scr" id="inc" hidden>
+  <div class="av" style="width:110px;height:110px;border-radius:55px;font-size:48px" id="incav">?</div>
+  <div><b style="font-size:24px" id="incname">Name</b><div class="note" id="inckind">Incoming call</div></div>
+  <div style="display:flex;gap:40px">
+    <button class="cb end" id="incno" type="button" aria-label="Decline">✕</button>
+    <button class="cb acc" id="incyes" type="button" aria-label="Answer">📞</button>
+  </div>
+</section>
+
+<dialog id="dlg"><h2 style="margin:0 0 8px" id="dtitle"></h2><div id="dbody"></div>
+  <div class="btns" style="justify-content:flex-end"><button class="btn s" id="dclose" type="button">Close</button></div></dialog>
+<div id="toast" hidden role="status"></div>
+
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const DEF_SRV='https://ntfy.sh';
+/* Address of your push relay (see PUSH-SETUP.md). Put it here once and every phone gets it automatically. */
+const DEF_PUSH='';
+/* ---------- storage ---------- */
+const ls={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},del(k){try{localStorage.removeItem(k);}catch(e){}}};
+let me=ls.get('pc_me',null);              // {name,pub,priv,inbox}
+let contacts=ls.get('pc_contacts',{});    // keyId -> {id,name,pk,ib,st:'ok'|'req'}
+let msgs=ls.get('pc_msgs',{});            // keyId -> [{id,o,x,ts,ok,sys}]
+let unread=ls.get('pc_unread',{});
+let blocked=ls.get('pc_blocked',[]);
+let cfg=Object.assign({srv:DEF_SRV,usepub:true,turn:{url:'',user:'',pass:''},pin:'',salt:'',wake:false,push:{url:'',on:false}},ls.get('pc_cfg',{}));
+let lastTs=ls.get('pc_last',0);
+let seen=ls.get('pc_seen',[]);
+const save={me:()=>ls.set('pc_me',me),c:()=>ls.set('pc_contacts',contacts),m:()=>{for(const k in msgs)if(msgs[k].length>400)msgs[k]=msgs[k].slice(-400);ls.set('pc_msgs',msgs);},u:()=>ls.set('pc_unread',unread),cfg:()=>ls.set('pc_cfg',cfg),b:()=>ls.set('pc_blocked',blocked)};
+try{const q=new URLSearchParams(location.search).get('srv');if(q){cfg.srv=q;save.cfg();}}catch(e){}
+
+/* ---------- helpers ---------- */
+const enc=new TextEncoder(),dec=new TextDecoder();
+const b64=u=>{let s='';u=new Uint8Array(u);for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');};
+const unb64=s=>{s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u;};
+const rnd=n=>b64(crypto.getRandomValues(new Uint8Array(n)));
+const rndTopic=()=>'pc'+[...crypto.getRandomValues(new Uint8Array(24))].map(b=>'abcdefghijklmnopqrstuvwxyz234567'[b%32]).join('');
+async function sha(u){return new Uint8Array(await crypto.subtle.digest('SHA-256',u));}
+async function keyIdOf(pkB64){return b64((await sha(unb64(pkB64))).subarray(0,9));}
+let tt;function toast(t,ms){const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(tt);tt=setTimeout(()=>e.hidden=true,ms||3000);}
+const GR=[['#2f6df0','#1fb99a'],['#7a4de8','#3b82f6'],['#e0568a','#f09a4a'],['#14a37f','#6bd36b'],['#d9822b','#e5c34b'],['#3a7bd5','#00d2ff']];
+const avBg=n=>{let h=0;for(const ch of String(n||'?'))h=(h*31+ch.charCodeAt(0))>>>0;const g=GR[h%GR.length];return 'linear-gradient(135deg,'+g[0]+','+g[1]+')';};
+const dayLbl=ts=>{const d=new Date(ts),t=new Date(),y=new Date(Date.now()-864e5);const k=x=>x.toDateString();return k(d)===k(t)?'Today':k(d)===k(y)?'Yesterday':d.toLocaleDateString([], {day:'numeric',month:'short',year:d.getFullYear()===t.getFullYear()?undefined:'numeric'});};
+const listT=ts=>{const d=new Date(ts);return d.toDateString()===new Date().toDateString()?fmtT(ts):dayLbl(ts);};
+const initial=n=>(String(n||'?').trim()[0]||'?').toUpperCase();
+const fmtT=ts=>{const d=new Date(ts);return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});};
+const esc0=s=>String(s==null?'':s);
+
+const TOKRE=/^pc[a-z2-7]{20,40}$/,RELAYRE=/^https:\/\/[A-Za-z0-9.-]+(:\d+)?(\/[A-Za-z0-9._~\/-]*)?$/;
+const pushURL=()=>String((cfg.push&&cfg.push.url)||DEF_PUSH||'').trim().replace(/\/+$/,'');
+const pushActive=()=>!!(cfg.push&&cfg.push.on&&me&&me.pt);
+const helloObj=()=>({t:'hello',n:me.name,ib:me.inbox,pk:me.pub,wk:cfg.wake?me.wk:'',pw:pushActive()?me.pt:'',pr:pushActive()?pushURL():''});
+function broadcastHello(){for(const k in contacts)if(contacts[k].st==='ok')sendTo(contacts[k],helloObj(),true).catch(()=>{});}
+
+/* ---------- crypto ---------- */
+const shared=new Map();
+async function aesFor(pkB64){
+  if(shared.has(pkB64))return shared.get(pkB64);
+  const priv=await crypto.subtle.importKey('jwk',me.priv,{name:'ECDH',namedCurve:'P-256'},false,['deriveBits']);
+  const pub=await crypto.subtle.importKey('raw',unb64(pkB64),{name:'ECDH',namedCurve:'P-256'},false,[]);
+  const bits=await crypto.subtle.deriveBits({name:'ECDH',public:pub},priv,256);
+  const hk=await crypto.subtle.importKey('raw',bits,'HKDF',false,['deriveKey']);
+  const k=await crypto.subtle.deriveKey({name:'HKDF',hash:'SHA-256',salt:enc.encode('parivar-chat-v1'),info:enc.encode('msg')},hk,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+  shared.set(pkB64,k);return k;
+}
+async function deflate(u8){const cs=new Blob([u8]).stream().pipeThrough(new CompressionStream('deflate-raw'));return new Uint8Array(await new Response(cs).arrayBuffer());}
+async function inflate(u8){const ds=new Blob([u8]).stream().pipeThrough(new DecompressionStream('deflate-raw'));return new Uint8Array(await new Response(ds).arrayBuffer());}
+async function seal(pk,obj,withKey){
+  const k=await aesFor(pk),iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},k,await deflate(enc.encode(JSON.stringify(obj)))));
+  const env={v:1,s:await keyIdOf(me.pub),iv:b64(iv),ct:b64(ct)};
+  if(withKey)env.k=me.pub;
+  return JSON.stringify(env);
+}
+async function openEnv(env,pk){
+  const k=await aesFor(pk);
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(env.iv)},k,unb64(env.ct));
+  return JSON.parse(dec.decode(await inflate(new Uint8Array(pt))));
+}
+
+/* ---------- transport (ntfy-style publish/subscribe) ---------- */
+const CH=2800;
+async function publish(topic,str){
+  const r=await fetch(cfg.srv.replace(/\/+$/,'')+'/'+topic,{method:'POST',body:str});
+  if(!r.ok)throw new Error('http '+r.status);
+}
+async function sendTo(c,obj,withKey){
+  const w=await seal(c.pk,obj,withKey);
+  if(w.length<=CH){await publish(c.ib,w);return;}
+  const id=rnd(6),n=Math.ceil(w.length/CH);
+  for(let i=0;i<n;i++)await publish(c.ib,JSON.stringify({p:[id,i,n],d:w.slice(i*CH,(i+1)*CH)}));
+}
+let es=null,esTimer=null,connOK=false;
+function setConn(ok,t){connOK=ok;$('conn').textContent=t||(ok?'connected':'connecting…');$('cdot').classList.toggle('on',!!ok);}
+function subscribe(){
+  if(!me)return;clearTimeout(esTimer);try{es&&es.close();}catch(e){}
+  const since=lastTs?String(lastTs):'12h';
+  try{es=new EventSource(cfg.srv.replace(/\/+$/,'')+'/'+me.inbox+'/sse?since='+since);}catch(e){setConn(false,'server address is wrong');return;}
+  es.onopen=()=>setConn(true);
+  es.onmessage=ev=>{try{const d=JSON.parse(ev.data);if(d.event==='message'&&d.message)onWire(d);}catch(e){}};
+  es.onerror=()=>{setConn(false,'reconnecting…');try{es.close();}catch(e){}esTimer=setTimeout(subscribe,3000);};
+}
+const parts={};
+function onWire(d){
+  const id=d.id;if(id&&seen.includes(id))return;
+  if(id){seen.push(id);if(seen.length>600)seen=seen.slice(-400);ls.set('pc_seen',seen);}
+  if(d.time&&d.time>lastTs){lastTs=d.time;ls.set('pc_last',lastTs);}
+  let o;try{o=JSON.parse(d.message);}catch(e){return;}
+  if(o&&o.p){const [pid,i,n]=o.p;const e=parts[pid]||(parts[pid]={n,a:[],t:Date.now()});e.a[i]=o.d;
+    if(e.a.filter(x=>x!=null).length===n){delete parts[pid];try{handleEnv(JSON.parse(e.a.join('')),d.time);}catch(x){}}
+    for(const k in parts)if(Date.now()-parts[k].t>600000)delete parts[k];return;}
+  handleEnv(o,d.time);
+}
+async function handleEnv(env,time){
+  try{
+    if(!env||env.v!==1||!env.s)return;
+    if(blocked.includes(env.s))return;
+    let c=contacts[env.s],pk=c&&c.pk;
+    if(env.k){ if(await keyIdOf(env.k)!==env.s)return; pk=env.k; }
+    if(!pk)return;
+    let p;try{p=await openEnv(env,pk);}catch(e){return;}
+    await dispatch(env.s,c,p,pk,time);
+  }catch(e){}
+}
+async function dispatch(kid,c,p,pk,time){
+  if(p.t==='hello'){
+    if(!c){c=contacts[kid]={id:kid,name:String(p.n||'Unknown').slice(0,30),pk,ib:String(p.ib||''),wk:/^pc[a-z2-7]{20,40}$/.test(p.wk||'')?p.wk:'',st:'req'};if(!/^pc[a-z2-7]{20,40}$/.test(c.ib)){delete contacts[kid];return;}
+      save.c();addSys(kid,'wants to chat with you');notify(c.name,'wants to chat with you');}
+    else{c.name=String(p.n||c.name).slice(0,30);if(/^pc[a-z2-7]{20,40}$/.test(p.ib||''))c.ib=p.ib;}
+    if(c){c.wk=/^pc[a-z2-7]{20,40}$/.test(p.wk||'')?p.wk:'';c.pw=TOKRE.test(p.pw||'')?p.pw:'';c.pr=(c.pw&&RELAYRE.test(p.pr||''))?String(p.pr).replace(/\/+$/,''):'';save.c();}
+    renderList();if(cur===kid)renderChat();return;
+  }
+  if(!c)return;
+  if(p.t==='msg'){
+    const L=msgs[kid]||(msgs[kid]=[]);if(L.some(m=>m.id===p.id))return;
+    L.push({id:p.id,o:0,x:String(p.x).slice(0,4000),ts:p.ts||Date.now()});save.m();
+    if(cur!==kid||document.hidden){unread[kid]=(unread[kid]||0)+1;save.u();notify(c.name,String(p.x).slice(0,80));}
+    renderList();if(cur===kid)renderChat();return;
+  }
+  if(p.t==='offer')return onOffer(kid,c,p,time);
+  if(p.t==='answer')return onAnswer(kid,p);
+  if(p.t==='ringing'){if(call&&call.cid===p.cid&&call.state==='ring'){call.ringing=true;clearTimeout(call.waitT);setStat('Ringing on their phone…');}return;}
+  if(p.t==='end')return onRemoteEnd(kid,p);
+  if(p.t==='busy')return onRemoteEnd(kid,p,'busy');
+}
+function notify(t,b){
+  try{if(document.hidden&&'Notification' in window&&Notification.permission==='granted'){
+    if('serviceWorker' in navigator){navigator.serviceWorker.ready.then(r=>r.showNotification(t,{body:b,icon:'chat-192.png',badge:'chat-192.png',tag:'pc',renotify:true,data:{url:location.origin+location.pathname}})).catch(()=>{});}
+    else{const n=new Notification(t,{body:b,icon:'chat-192.png',tag:'pc'});n.onclick=()=>{window.focus();n.close();};}
+  }}catch(e){}
+  try{navigator.vibrate&&document.hidden&&navigator.vibrate(120);}catch(e){}}
+
+/* ---------- screens ---------- */
+const SC=['setup','list','add','chat','settings'];
+let cur=null,prevScr='list';
+function show(n){for(const s of SC)$(s).hidden=s!==n;if(n!=='chat')cur=null;}
+document.querySelectorAll('.back').forEach(b=>b.onclick=()=>{if(!$('chat').hidden){cur=null;}show('list');renderList();});
+
+function addSys(kid,t){(msgs[kid]||(msgs[kid]=[])).push({id:rnd(6),sys:1,x:t,ts:Date.now()});save.m();}
+function renderList(){
+  const box=$('rows');box.innerHTML='';
+  const ids=Object.keys(contacts).sort((a,b)=>{const la=(msgs[a]||[]).slice(-1)[0],lb=(msgs[b]||[]).slice(-1)[0];return (lb?lb.ts:0)-(la?la.ts:0);});
+  if(!ids.length){const d=document.createElement('div');d.className='empty';const im=document.createElement('img');im.src='chat-192.png';im.alt='';const bt=document.createElement('b');bt.textContent='No chats yet';const tx=document.createElement('div');tx.textContent='Tap "+ Add person" and send your link to your family.';d.append(im,bt,tx);box.appendChild(d);return;}
+  for(const id of ids){
+    const c=contacts[id],L=msgs[id]||[],last=L.slice(-1)[0];
+    const r=document.createElement('div');r.className='row';r.tabIndex=0;r.setAttribute('role','button');
+    const a=document.createElement('div');a.className='av';a.textContent=initial(c.name);a.style.background=avBg(c.name);
+    const t=document.createElement('div');t.className='t';const b=document.createElement('b');b.textContent=c.name+(c.st==='req'?'  (request)':'');
+    const s=document.createElement('small');s.textContent=last?(last.sys?last.x:(last.o?'You: ':'')+last.x):'Tap to chat';
+    t.append(b,s);r.append(a,t);
+    const mt=document.createElement('div');mt.className='meta';
+    if(last){const tm=document.createElement('time');tm.textContent=listT(last.ts);mt.appendChild(tm);}
+    if(unread[id]){const u=document.createElement('span');u.className='badge';u.textContent=unread[id];mt.appendChild(u);}
+    if(mt.childNodes.length)r.appendChild(mt);
+    r.onclick=()=>openChat(id);r.onkeydown=e=>{if(e.key==='Enter')openChat(id);};
+    box.appendChild(r);
+  }
+}
+function openChat(id){cur=id;unread[id]=0;save.u();show('chat');cur=id;renderChat();$('txt').focus();}
+function renderChat(){
+  const c=contacts[cur];if(!c){show('list');return;}
+  $('ctitle').firstChild.textContent=c.name;$('csub').textContent=c.st==='req'?'not accepted yet':'end-to-end locked';
+  const rb=$('reqbox');rb.innerHTML='';
+  if(c.st==='req'){
+    const d=document.createElement('div');d.className='req';d.textContent=c.name+' opened your link and wants to chat. Only accept people you know.';
+    const bs=document.createElement('div');bs.className='btns';
+    const y=document.createElement('button');y.className='btn';y.textContent='Accept';y.onclick=async()=>{c.st='ok';save.c();try{await sendTo(c,helloObj(),true);}catch(e){}renderChat();};
+    const n=document.createElement('button');n.className='btn bad';n.textContent='Block';n.onclick=()=>{blocked.push(cur);save.b();delete contacts[cur];delete msgs[cur];save.c();save.m();show('list');renderList();};
+    bs.append(y,n);rb.append(d,bs);
+  }
+  const box=$('msgs');box.innerHTML='';let lastDay='';
+  for(const m of msgs[cur]||[]){
+    const dl=dayLbl(m.ts);if(dl!==lastDay){lastDay=dl;const dd=document.createElement('div');dd.className='day';dd.textContent=dl;box.appendChild(dd);}
+    const d=document.createElement('div');
+    if(m.sys){d.className='m sys';d.textContent=m.x;}
+    else{d.className='m '+(m.o?'o':'i')+(m.fail?' fail':'');d.textContent=m.x;
+      const s=document.createElement('small');s.textContent=fmtT(m.ts)+(m.o?(m.fail?' · not sent, tap to retry':m.ok?' ✓':' …'):'');d.appendChild(s);
+      if(m.o&&m.fail)d.onclick=()=>retry(m);}
+    box.appendChild(d);
+  }
+  const cb=$('cbody');cb.scrollTop=cb.scrollHeight;
+}
+async function deliver(c,m){
+  try{await sendTo(c,{t:'msg',id:m.id,x:m.x,ts:m.ts});m.ok=1;m.fail=0;pushMsg(c);}catch(e){m.fail=1;}
+  save.m();if(cur&&contacts[cur]===c)renderChat();renderList();
+}
+function retry(m){const c=contacts[cur];m.fail=0;renderChat();deliver(c,m);}
+async function sendText(){
+  const c=contacts[cur];if(!c)return;const x=$('txt').value.trim();if(!x)return;
+  if(c.st==='req'){toast('Accept this person first.');return;}
+  $('txt').value='';autoh();$('send').disabled=true;
+  const m={id:rnd(8),o:1,x:x.slice(0,4000),ts:Date.now()};(msgs[cur]||(msgs[cur]=[])).push(m);save.m();renderChat();renderList();
+  deliver(c,m);
+}
+$('send').onclick=sendText;
+$('txt').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!/Android|iPhone|iPad/i.test(navigator.userAgent)){e.preventDefault();sendText();}});
+function autoh(){const t=$('txt');t.style.height='auto';t.style.height=Math.min(120,t.scrollHeight)+'px';}
+$('txt').addEventListener('input',()=>{autoh();$('send').disabled=!$('txt').value.trim();});$('send').disabled=true;
+
+/* ---------- add people ---------- */
+function myLink(){
+  const card=b64(enc.encode(JSON.stringify({n:me.name,pk:me.pub,ib:me.inbox})));
+  return location.origin+location.pathname+'#add='+card;
+}
+$('toAdd').onclick=()=>{$('mylink').textContent=myLink();show('add');};
+$('copylink').onclick=async()=>{try{await navigator.clipboard.writeText(myLink());toast('Link copied');}catch(e){toast('Select the link and copy it by hand');}};
+$('sharelink').onclick=async()=>{const t='Chat with me privately on Connective. Open this link:\n'+myLink();
+  try{if(navigator.share){await navigator.share({text:t});return;}}catch(e){if(e&&e.name==='AbortError')return;}
+  try{await navigator.clipboard.writeText(t);toast('Message copied. Paste it in WhatsApp.');}catch(e){toast('Copy the link above by hand');}};
+async function addFromCard(card){
+  let o;try{o=JSON.parse(dec.decode(unb64(card)));}catch(e){toast('That link is not valid');return false;}
+  if(!o||!o.pk||!/^pc[a-z2-7]{20,40}$/.test(o.ib||'')){toast('That link is not valid');return false;}
+  let kid;try{kid=await keyIdOf(o.pk);await aesFor(o.pk);}catch(e){toast('That link is not valid');return false;}
+  if(kid===await keyIdOf(me.pub)){toast('That is your own link');return false;}
+  blocked=blocked.filter(x=>x!==kid);save.b();
+  let c=contacts[kid];
+  if(!c){c=contacts[kid]={id:kid,name:String(o.n||'Friend').slice(0,30),pk:o.pk,ib:o.ib,st:'ok'};addSys(kid,'Chat started. Messages are locked end to end.');}
+  else{c.st='ok';c.ib=o.ib;}
+  save.c();
+  try{await sendTo(c,helloObj(),true);}catch(e){toast('Added. Could not reach the server yet, it will work once online.');}
+  renderList();openChat(kid);return true;
+}
+$('addbtn').onclick=async()=>{const v=$('pastelink').value.trim();const i=v.indexOf('#add=');if(i<0){toast('Paste the whole link');return;}if(await addFromCard(v.slice(i+5)))$('pastelink').value='';};
+async function checkHash(){
+  const h=location.hash;if(h.startsWith('#add=')&&me){const card=h.slice(5);history.replaceState(null,'',location.pathname+location.search);await addFromCard(card);}
+}
+window.addEventListener('hashchange',()=>{if(!$('setup').hidden||!$('lock').hidden)return;checkHash();});
+
+/* ---------- safety number ---------- */
+$('cmenu').onclick=async()=>{
+  const c=contacts[cur];if(!c)return;
+  const a=unb64(me.pub),b=unb64(c.pk);const [x,y]=b64(a)<b64(b)?[a,b]:[b,a];
+  const all=new Uint8Array(x.length+y.length);all.set(x);all.set(y,x.length);
+  const h=await sha(all);let s='';for(let i=0;i<30;i+=5){let n=0;for(let j=0;j<5;j++)n=n*256+h[i+j];s+=String(n%100000).padStart(5,'0')+(i<25?(i===10?'\n':' '):'');}
+  const body=$('dbody');body.innerHTML='';$('dtitle').textContent='Is this really '+c.name+'?';
+  const p=document.createElement('p');p.className='note';p.textContent='Call '+c.name+' and read these numbers to each other. If they match on both phones, nobody is in the middle.';
+  const n=document.createElement('div');n.className='sn';n.textContent=s;n.style.whiteSpace='pre';
+  const bs=document.createElement('div');bs.className='btns';
+  const d1=document.createElement('button');d1.className='btn s';d1.textContent='Clear this chat';d1.onclick=()=>{msgs[cur]=[];save.m();$('dlg').close();renderChat();renderList();};
+  const d2=document.createElement('button');d2.className='btn bad';d2.textContent='Remove person';d2.onclick=()=>{if(!confirm('Remove '+c.name+' and this chat?'))return;delete contacts[cur];delete msgs[cur];save.c();save.m();$('dlg').close();show('list');renderList();};
+  bs.append(d1,d2);body.append(p,n,bs);$('dlg').showModal();
+};
+$('dclose').onclick=()=>$('dlg').close();
+
+/* ---------- calls (WebRTC, peer to peer, encrypted) ---------- */
+let call=null;     // {cid,kid,pc,stream,video,dir,state,timer,start,facing}
+let pendingOffer=null;
+function iceServers(){
+  const l=[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302','stun:stun.cloudflare.com:3478','stun:stun.nextcloud.com:443']}];
+  if(cfg.mcache&&cfg.mcache.length)for(const x of cfg.mcache)l.push(x);
+  if(cfg.turn.url)l.push({urls:cfg.turn.url.split(/[\s,]+/).filter(Boolean),username:cfg.turn.user,credential:cfg.turn.pass});
+  if(cfg.usepub)l.push({urls:['turn:openrelay.metered.ca:80','turn:openrelay.metered.ca:443','turns:openrelay.metered.ca:443?transport=tcp'],username:'openrelayproject',credential:'openrelayproject'});
+  return l;
+}
+async function refreshRelay(){
+  const m=cfg.metered;if(!m||!m.app||!m.key)return;
+  try{
+    const ac=new AbortController(),t=setTimeout(()=>ac.abort(),5000);
+    const r=await fetch('https://'+encodeURIComponent(m.app)+'.metered.live/api/v1/turn/credentials?apiKey='+encodeURIComponent(m.key),{signal:ac.signal});clearTimeout(t);
+    if(!r.ok)throw 0;const a=await r.json();
+    if(Array.isArray(a)&&a.length){cfg.mcache=a.filter(x=>x&&x.urls);cfg.mtime=Date.now();save.cfg();}
+  }catch(e){}
+}
+async function netTest(){
+  const out=$('netres');out.hidden=false;out.textContent='Checking… (about 8 seconds)';
+  await refreshRelay();
+  const n={host:0,srflx:0,relay:0};
+  try{
+    const pc=new RTCPeerConnection({iceServers:iceServers()});pc.createDataChannel('t');
+    pc.onicecandidate=e=>{if(e.candidate){const m=/ typ (\w+)/.exec(e.candidate.candidate);if(m&&n[m[1]]!==undefined)n[m[1]]++;}};
+    await pc.setLocalDescription(await pc.createOffer());
+    await new Promise(r=>{const t=setTimeout(r,8000);pc.addEventListener('icegatheringstatechange',()=>{if(pc.iceGatheringState==='complete'){clearTimeout(t);r();}});});
+    pc.close();
+  }catch(e){out.textContent='This browser cannot run the check. Open the app in Chrome or Safari.';return;}
+  let msg='Direct address: '+(n.srflx?'found':'NOT found')+'\nRelay: '+(n.relay?'working':'NOT working')+'\n\n';
+  if(n.relay)msg+='Good. Calls should connect on any network.';
+  else if(n.srflx)msg+='Calls may connect directly, but some Wi-Fi networks will fail. Add the free relay account above.';
+  else msg+='This network blocks call setup. Try mobile data, or add the free relay account above.';
+  out.style.whiteSpace='pre-wrap';out.textContent=msg;
+}
+let ring=null;
+function startRing(){stopRing();try{const ac=new (window.AudioContext||window.webkitAudioContext)();try{ac.resume();}catch(e){}const tick=()=>{const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=440;g.gain.value=.12;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+.4);const o2=ac.createOscillator(),g2=ac.createGain();o2.frequency.value=480;g2.gain.value=.12;o2.connect(g2);g2.connect(ac.destination);o2.start(ac.currentTime+.5);o2.stop(ac.currentTime+.9);try{navigator.vibrate&&navigator.vibrate([400,200,400]);}catch(e){}};tick();ring={ac,iv:setInterval(tick,2500)};}catch(e){}}
+const lastMsgPush=new Map();
+function ringPush(c,k,video){
+  if(!(c&&c.pw&&c.pr))return false;
+  try{fetch(c.pr+'/ring/'+c.pw,{method:'POST',headers:{'content-type':'text/plain'},body:JSON.stringify({k,n:me.name,v:video?1:0}),keepalive:true}).catch(()=>{});}catch(e){}
+  return true;
+}
+function pushMsg(c){const t=Date.now();if(c.pw&&c.pr&&t-(lastMsgPush.get(c.id)||0)>15000){lastMsgPush.set(c.id,t);ringPush(c,'msg');}}
+function wakePeer(c,video){
+  if(ringPush(c,'call',video))return;
+  if(!c.wk)return;
+  const q=new URLSearchParams({title:me.name+' is calling',message:(video?'Video call':'Voice call')+'. Tap to answer.',priority:'5',tags:'telephone_receiver',click:location.origin+location.pathname});
+  try{fetch(cfg.srv.replace(/\/+$/,'')+'/'+c.wk+'/publish?'+q.toString(),{mode:'no-cors'}).catch(()=>{});}catch(e){}
+}
+let rb=null;
+function startRingback(){stopRingback();try{const ac=new (window.AudioContext||window.webkitAudioContext)();const beep=()=>{const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=425;g.gain.value=.06;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+1);};beep();rb={ac,iv:setInterval(beep,4000)};}catch(e){}}
+function stopRingback(){if(rb){clearInterval(rb.iv);try{rb.ac.close();}catch(e){}rb=null;}}
+function stopRing(){stopRingback();if(ring){clearInterval(ring.iv);try{ring.ac.close();}catch(e){}ring=null;}try{navigator.vibrate&&navigator.vibrate(0);}catch(e){}}
+function gathered(pc){return new Promise(res=>{if(pc.iceGatheringState==='complete')return res();const t=setTimeout(res,5000);pc.addEventListener('icegatheringstatechange',()=>{if(pc.iceGatheringState==='complete'){clearTimeout(t);res();}});});}
+async function getMedia(video,facing){
+  return navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:video?{facingMode:facing||'user',width:{ideal:640},height:{ideal:480}}:false});
+}
+function mediaErr(e){
+  const n=e&&e.name;
+  if(n==='NotAllowedError')return 'Microphone or camera is blocked. In Chrome: tap the lock icon by the address, then Permissions, then allow.';
+  if(n==='NotFoundError')return 'No microphone or camera found.';
+  if(n==='NotReadableError')return 'Another app is using the microphone or camera.';
+  return 'Could not start the call: '+(e&&e.message||'unknown error');
+}
+function callUI(on){$('call').hidden=!on;if(!on){$('rv').srcObject=null;$('lv').srcObject=null;}}
+function setStat(t){$('cstat').textContent=t;}
+function setupPC(video){
+  const pc=new RTCPeerConnection({iceServers:iceServers()});
+  call.pc=pc;
+  pc.ontrack=e=>{const rv=$('rv');rv.srcObject=e.streams[0];if(e.track.kind==='video'){rv.style.visibility='visible';$('avbig').hidden=true;}const pl=rv.play&&rv.play();if(pl&&pl.catch)pl.catch(()=>{});};
+  pc.onconnectionstatechange=()=>{
+    if(!call||call.pc!==pc)return;const s=pc.connectionState;
+    if(s==='connected'){stopRingback();call.state='up';call.start=call.start||Date.now();stopRing();tickTimer();}
+    if(s==='failed'){endCall('Could not connect. This Wi-Fi blocks direct calls. Open Settings, tap Check my network, and add the free relay account. Or try mobile data.',true);}
+    if(s==='disconnected'){setStat('Connection weak…');setTimeout(()=>{if(call&&call.pc===pc&&pc.connectionState==='disconnected')endCall('Call dropped',true);},8000);}
+  };
+  call.stream.getTracks().forEach(t=>pc.addTrack(t,call.stream));
+  const lv=$('lv');lv.srcObject=call.stream;lv.hidden=!video;
+  $('bcam').hidden=!video;$('bflip').hidden=!video;$('avbig').hidden=false;$('rv').style.visibility='hidden';
+  return pc;
+}
+function tickTimer(){
+  clearInterval(call&&call.timer);if(!call)return;
+  const f=()=>{if(!call)return;if(call.state==='up'){const s=Math.floor((Date.now()-call.start)/1000);setStat(String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'));}};
+  f();call.timer=setInterval(f,1000);
+}
+async function startCall(video){
+  const c=contacts[cur];if(!c)return;
+  if(c.st==='req'){toast('Accept this person first.');return;}
+  if(call){toast('Already in a call');return;}
+  if(!window.RTCPeerConnection||!navigator.mediaDevices){toast('This browser cannot make calls. Use Chrome.');return;}
+  let stream;try{stream=await getMedia(video);}catch(e){toast(mediaErr(e),6000);return;}
+  await refreshRelay();
+  call={cid:rnd(8),kid:cur,video,dir:'out',state:'ring',stream,facing:'user'};
+  $('cname').textContent=c.name;$('callav').textContent=initial(c.name);callUI(true);setStat('Calling…');defaultOutput(video);
+  wake();
+  try{
+    const pc=setupPC(video);
+    await pc.setLocalDescription(await pc.createOffer());await gathered(pc);
+    await sendTo(c,{t:'offer',cid:call.cid,sdp:pc.localDescription.sdp,video,ts:Date.now()});
+    wakePeer(c,video);
+    setStat('Calling…');startRingback();
+    call.waitT=setTimeout(()=>{if(call&&call.state==='ring'&&!call.ringing)setStat('Calling… their app is closed, waiting');},9000);
+    call.ringT=setTimeout(()=>{if(call&&call.state==='ring')endCall('No answer',true,true);},50000);
+  }catch(e){endCall(e&&e.message&&/http|fetch|Failed/i.test(e.message)?'Could not reach the server. Check your internet.':'Could not start the call.',true);}
+}
+$('cvoice').onclick=()=>startCall(false);
+$('cvideo').onclick=()=>startCall(true);
+async function onOffer(kid,c,p,time){
+  if(c.st==='req')return;
+  const age=Math.abs(Date.now()-(p.ts||0));
+  if(age>60000){addSys(kid,(p.video?'Missed video call ':'Missed call ')+'at '+fmtT(p.ts||Date.now()));save.m();notify(c.name,'Missed call');renderList();if(cur===kid)renderChat();return;}
+  if(call||pendingOffer){try{await sendTo(c,{t:'busy',cid:p.cid});}catch(e){}return;}
+  pendingOffer={kid,c,p};
+  $('incname').textContent=c.name;$('incav').textContent=initial(c.name);$('inckind').textContent=p.video?'Incoming video call':'Incoming voice call';
+  $('inc').hidden=false;startRing();sendTo(c,{t:'ringing',cid:p.cid}).catch(()=>{});notify(c.name,p.video?'Incoming video call':'Incoming call');
+  pendingOffer.t=setTimeout(()=>{if(pendingOffer&&pendingOffer.p===p){declineIncoming(true);}},45000);
+}
+function declineIncoming(missed){
+  const po=pendingOffer;if(!po)return;clearTimeout(po.t);pendingOffer=null;$('inc').hidden=true;stopRing();
+  if(missed){addSys(po.kid,'Missed call at '+fmtT(Date.now()));save.m();renderList();if(cur===po.kid)renderChat();}
+  else sendTo(po.c,{t:'end',cid:po.p.cid}).catch(()=>{});
+}
+$('incno').onclick=()=>declineIncoming(false);
+$('incyes').onclick=async()=>{
+  const po=pendingOffer;if(!po)return;clearTimeout(po.t);pendingOffer=null;$('inc').hidden=true;stopRing();
+  const {kid,c,p}=po;let stream;
+  try{stream=await getMedia(!!p.video);}catch(e){toast(mediaErr(e),6000);sendTo(c,{t:'end',cid:p.cid}).catch(()=>{});return;}
+  await refreshRelay();
+  call={cid:p.cid,kid,video:!!p.video,dir:'in',state:'conn',stream,facing:'user'};
+  $('cname').textContent=c.name;$('callav').textContent=initial(c.name);callUI(true);setStat('Connecting…');defaultOutput(!!p.video);wake();
+  try{
+    const pc=setupPC(!!p.video);
+    await pc.setRemoteDescription({type:'offer',sdp:p.sdp});
+    await pc.setLocalDescription(await pc.createAnswer());await gathered(pc);
+    await sendTo(c,{t:'answer',cid:p.cid,sdp:pc.localDescription.sdp});
+  }catch(e){endCall('Could not connect the call.',true);}
+};
+async function onAnswer(kid,p){
+  if(!call||call.cid!==p.cid||call.dir!=='out'||call.answered)return;call.answered=true;stopRingback();clearTimeout(call.ringT);setStat('Connecting…');
+  try{await call.pc.setRemoteDescription({type:'answer',sdp:p.sdp});}catch(e){endCall('Could not connect the call.',true);}
+}
+function onRemoteEnd(kid,p,why){
+  if(pendingOffer&&pendingOffer.p.cid===p.cid){clearTimeout(pendingOffer.t);const po=pendingOffer;pendingOffer=null;$('inc').hidden=true;stopRing();addSys(po.kid,'Missed call at '+fmtT(Date.now()));save.m();renderList();if(cur===po.kid)renderChat();return;}
+  if(call&&call.cid===p.cid)endCall(why==='busy'?'They are on another call':'Call ended',false);
+}
+function endCall(msg,notifyPeer,missed){
+  if(!call)return;const c=call;call=null;earMode=false;$('bspk').textContent='🔊';$('bspk').classList.remove('on');try{$('rv').volume=1;}catch(e){}
+  clearTimeout(c.ringT);clearTimeout(c.waitT);clearInterval(c.timer);stopRing();try{navigator.audioSession&&(navigator.audioSession.type='auto');}catch(e){}
+  try{c.pc&&c.pc.close();}catch(e){}try{c.stream.getTracks().forEach(t=>t.stop());}catch(e){}
+  const ct=contacts[c.kid];
+  if(notifyPeer&&ct)sendTo(ct,{t:'end',cid:c.cid}).catch(()=>{});
+  if(notifyPeer&&ct&&c.dir==='out'&&c.state==='ring')ringPush(ct,'end');
+  const dur=c.start?Math.floor((Date.now()-c.start)/1000):0;
+  addSys(c.kid,(c.video?'Video call':'Voice call')+(dur?' · '+Math.floor(dur/60)+':'+String(dur%60).padStart(2,'0'):(c.dir==='out'?(missed?' · no answer':' · not connected'):' · not connected')));
+  save.m();callUI(false);unwake();renderList();if(cur===c.kid)renderChat();
+  if(msg&&msg!=='Call ended')toast(msg,5000);
+}
+$('bend').onclick=()=>endCall('Call ended',true);
+$('bmute').onclick=()=>{if(!call)return;const t=call.stream.getAudioTracks()[0];if(!t)return;t.enabled=!t.enabled;$('bmute').classList.toggle('on',!t.enabled);$('bmute').textContent=t.enabled?'🎙':'🔇';};
+$('bcam').onclick=()=>{if(!call)return;const t=call.stream.getVideoTracks()[0];if(!t)return;t.enabled=!t.enabled;$('bcam').classList.toggle('on',!t.enabled);$('lv').style.opacity=t.enabled?1:.2;};
+$('bflip').onclick=async()=>{
+  if(!call||!call.video)return;const nf=call.facing==='user'?'environment':'user';
+  try{const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:nf}}});const nt=s.getVideoTracks()[0];
+    const sender=call.pc.getSenders().find(x=>x.track&&x.track.kind==='video');if(sender)await sender.replaceTrack(nt);
+    call.stream.getVideoTracks().forEach(t=>{t.stop();call.stream.removeTrack(t);});call.stream.addTrack(nt);$('lv').srcObject=call.stream;call.facing=nf;$('lv').classList.toggle('back',nf==='environment');}
+  catch(e){toast('Could not switch the camera');}
+};
+let earMode=false;
+function defaultOutput(video){
+  earMode=false;$('bspk').textContent='🔊';$('bspk').classList.remove('on');
+  try{if(navigator.audioSession){if(video){navigator.audioSession.type='playback';}else{navigator.audioSession.type='play-and-record';earMode=true;$('bspk').textContent='📱';$('bspk').classList.add('on');}}}catch(e){}
+}
+$('bspk').onclick=async()=>{
+  const rv=$('rv');earMode=!earMode;
+  let ok=false;
+  try{if(navigator.audioSession){navigator.audioSession.type=earMode?'play-and-record':'playback';ok=true;}}catch(e){}
+  try{
+    if(!ok&&rv.setSinkId&&navigator.mediaDevices.enumerateDevices){
+      const devs=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='audiooutput');
+      const ear=devs.find(d=>/earpiece|handset|receiver|phone/i.test(d.label)&&!/speaker/i.test(d.label));
+      const spk=devs.find(d=>/speaker/i.test(d.label))||devs.find(d=>d.deviceId==='default')||devs[0];
+      const t=earMode?ear:spk;
+      if(t){await rv.setSinkId(t.deviceId);ok=true;}
+    }
+  }catch(e){}
+  if(!ok){rv.volume=earMode?0.3:1;toast(earMode?'This browser cannot switch to the ear speaker, so the volume is lower. Hold the phone to your ear or use earphones.':'Volume is back to full.',5000);}
+  else toast(earMode?'Ear speaker':'Loudspeaker');
+  $('bspk').textContent=earMode?'📱':'🔊';$('bspk').classList.toggle('on',earMode);
+};
+let wl=null;async function wake(){try{wl=await navigator.wakeLock.request('screen');}catch(e){}}function unwake(){try{wl&&wl.release();}catch(e){}wl=null;}
+
+/* ---------- push (ring when closed) ---------- */
+const pushOK=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
+async function pushOn(silent){
+  const url=pushURL(),say=(t)=>{if(!silent)toast(t,6000);};
+  if(!RELAYRE.test(url)){say('Type the relay address first. It starts with https://');return false;}
+  if(!pushOK()){say('This browser cannot do push. On iPhone, add the app to the Home Screen first.');return false;}
+  try{
+    if(Notification.permission!=='granted'){if(silent)return false;if(await Notification.requestPermission()!=='granted'){say('Please allow notifications.');return false;}}
+    const reg=await navigator.serviceWorker.ready;
+    const key=(await (await fetch(url+'/vapid')).text()).trim();
+    let sub=await reg.pushManager.getSubscription();
+    const cur=sub&&sub.options&&sub.options.applicationServerKey;
+    if(sub&&(!cur||b64(cur)!==key)){await sub.unsubscribe();sub=null;}
+    if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:unb64(key)});
+    if(!me.pt){me.pt=rndTopic();me.ps=rnd(24);save.me();}
+    const r=await fetch(url+'/register',{method:'POST',headers:{'content-type':'text/plain'},body:JSON.stringify({tok:me.pt,sec:me.ps,sub:sub.toJSON()})});
+    if(!r.ok)throw new Error('relay said '+r.status);
+    const was=pushActive()&&cfg.push.url===url;
+    cfg.push={url,on:true};save.cfg();
+    if(!silent||!was)broadcastHello();
+    return true;
+  }catch(e){say('Could not turn on: '+((e&&e.message)||e));return false;}
+}
+async function pushOff(){
+  const url=pushURL();
+  try{if(url&&me.pt)await fetch(url+'/unregister',{method:'POST',headers:{'content-type':'text/plain'},body:JSON.stringify({tok:me.pt,sec:me.ps})});}catch(e){}
+  try{const reg=await navigator.serviceWorker.ready;const sb=await reg.pushManager.getSubscription();if(sb)await sb.unsubscribe();}catch(e){}
+  cfg.push.on=false;save.cfg();broadcastHello();
+}
+function renderPush(){
+  const on=pushActive();
+  $('pushurl').value=pushURL()||((Object.values(contacts).find(c=>c.pr)||{}).pr)||'';
+  $('pushon').hidden=on;$('pushoff').hidden=!on;$('pushurl').disabled=on;
+  $('pushstat').textContent=on?'On. Your phone will ring even when the app is closed.':(pushURL()?'Off':'Off. Ask the person who set it up for the address.');
+}
+$('pushon').onclick=async()=>{cfg.push.url=$('pushurl').value.trim().replace(/\/+$/,'');save.cfg();$('pushon').disabled=true;const ok=await pushOn(false);$('pushon').disabled=false;if(ok)toast('Turned on');renderPush();};
+$('pushoff').onclick=async()=>{$('pushoff').disabled=true;await pushOff();$('pushoff').disabled=false;renderPush();toast('Turned off');};
+
+/* ---------- settings ---------- */
+$('toSettings').onclick=()=>{$('wakeon').checked=!!cfg.wake;$('wakeid').textContent=cfg.wake?me.wk:'turn it on first';$('setname').value=me.name;$('usepub').checked=cfg.usepub;$('turnurl').value=cfg.turn.url;$('turnuser').value=cfg.turn.user;$('turnpass').value=cfg.turn.pass;$('mapp').value=(cfg.metered&&cfg.metered.app)||'';$('mkey').value=(cfg.metered&&cfg.metered.key)||'';$('srv').value=cfg.srv;$('myid').textContent='Your key code: '+me.id;renderPush();show('settings');};
+$('savename').onclick=async()=>{const n=$('setname').value.trim().slice(0,30);if(!n)return;me.name=n;save.me();toast('Saved. Others see the new name when you message them.');for(const k in contacts)if(contacts[k].st==='ok')sendTo(contacts[k],helloObj(),true).catch(()=>{});};
+$('wakeon').onchange=()=>{cfg.wake=$('wakeon').checked;save.cfg();$('wakeid').textContent=cfg.wake?me.wk:'turn it on first';for(const k in contacts)if(contacts[k].st==='ok')sendTo(contacts[k],helloObj(),true).catch(()=>{});toast(cfg.wake?'On. Now subscribe to the topic in the ntfy app.':'Off');};
+$('wakecopy').onclick=async()=>{if(!cfg.wake){toast('Turn it on first');return;}try{await navigator.clipboard.writeText(me.wk);toast('Topic copied');}catch(e){toast('Select the topic and copy it by hand');}};
+$('nettest').onclick=netTest;
+$('usepub').onchange=()=>{cfg.usepub=$('usepub').checked;save.cfg();};
+$('saveturn').onclick=()=>{cfg.metered={app:$('mapp').value.trim().replace(/\.metered\.live.*$/i,''),key:$('mkey').value.trim()};cfg.mcache=null;cfg.turn={url:$('turnurl').value.trim(),user:$('turnuser').value.trim(),pass:$('turnpass').value};save.cfg();toast('Saved');};
+$('savesrv').onclick=()=>{const v=$('srv').value.trim()||DEF_SRV;if(!/^https?:\/\//i.test(v)){toast('Address must start with https://');return;}cfg.srv=v;save.cfg();subscribe();toast('Saved');};
+$('wipe').onclick=()=>{if(!confirm('Erase all chats, contacts and your key from this phone? This cannot be undone.'))return;if(!confirm('Really erase everything?'))return;try{localStorage.clear();}catch(e){}location.href=location.pathname;};
+$('notif').onclick=async()=>{try{const r=await Notification.requestPermission();toast(r==='granted'?'Notifications are on':'Notifications are off');}catch(e){toast('This browser does not support notifications');}};
+let dip=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e;$('install').hidden=false;});
+$('install').onclick=async()=>{if(!dip)return;dip.prompt();try{await dip.userChoice;}catch(e){}dip=null;$('install').hidden=true;};
+async function hashPin(p,salt){return b64(await sha(enc.encode(salt+':'+p)));}
+$('setpin').onclick=async()=>{const p=$('newpin').value.trim();if(!/^\d{4,8}$/.test(p)){toast('PIN must be 4 to 8 digits');return;}cfg.salt=rnd(8);cfg.pin=await hashPin(p,cfg.salt);save.cfg();$('newpin').value='';toast('PIN set');};
+$('nopin').onclick=()=>{cfg.pin='';save.cfg();toast('PIN removed');};
+
+/* ---------- lock ---------- */
+let hiddenAt=0,locked=false,fails=0;
+function needLock(){return !!cfg.pin;}
+function doLock(){if(!needLock()||locked)return;locked=true;$('lock').hidden=false;$('lockpin').value='';$('lockmsg').textContent='Enter your PIN';setTimeout(()=>$('lockpin').focus(),50);}
+async function tryUnlock(){
+  const p=$('lockpin').value.trim();if(!p)return;
+  if(await hashPin(p,cfg.salt)===cfg.pin){locked=false;fails=0;$('lock').hidden=true;$('lockpin').value='';}
+  else{fails++;$('lockpin').value='';$('lockmsg').textContent='Wrong PIN'+(fails>=3?'. Wait 10 seconds.':'');if(fails>=3){$('lockok').disabled=true;setTimeout(()=>{$('lockok').disabled=false;},10000);}}
+}
+$('lockok').onclick=tryUnlock;$('lockpin').addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock();});
+window.addEventListener('online',()=>{if(me)subscribe();});
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden)hiddenAt=Date.now();
+  else{if(needLock()&&hiddenAt&&Date.now()-hiddenAt>30000&&!call)doLock();if(me&&(!es||es.readyState===2))subscribe();if(cur){unread[cur]=0;save.u();}}
+});
+
+/* ---------- start ---------- */
+async function boot(){
+  if('serviceWorker' in navigator){
+    try{navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>{const u=(r.active||r.waiting||r.installing||{}).scriptURL||'';if(/chat-sw\.js$/.test(u)&&r.scope.endsWith('/'))r.unregister();})).catch(()=>{}).then(()=>navigator.serviceWorker.register('chat-sw.js',{scope:'./chat.html'})).catch(()=>{});}catch(e){}
+  }
+  if(!me){
+    show('setup');
+    try{if(location.hash.startsWith('#add=')){const o=JSON.parse(dec.decode(unb64(location.hash.slice(5))));if(o&&o.n){$('invite').textContent=String(o.n).slice(0,30)+' invited you. Type your name to join.';$('invite').hidden=false;}}}catch(e){}
+    $('setupok').onclick=async()=>{
+      const n=$('myname').value.trim();if(!n){toast('Type your name');return;}
+      $('setupok').disabled=true;
+      try{
+        const kp=await crypto.subtle.generateKey({name:'ECDH',namedCurve:'P-256'},true,['deriveBits']);
+        const pub=b64(await crypto.subtle.exportKey('raw',kp.publicKey)),priv=await crypto.subtle.exportKey('jwk',kp.privateKey);
+        me={name:n.slice(0,30),pub,priv,inbox:rndTopic(),wk:rndTopic(),id:await keyIdOf(pub)};save.me();
+        startApp();
+      }catch(e){toast('This browser cannot make secure keys. Open the link in Chrome.',6000);$('setupok').disabled=false;}
+    };
+    return;
+  }
+  if(!me.id){me.id=await keyIdOf(me.pub);save.me();}
+  if(!me.wk){me.wk=rndTopic();save.me();}
+  if(needLock())doLock();
+  startApp();
+}
+function startApp(){
+  show('list');renderList();subscribe();checkHash();
+  if(pushActive())pushOn(true);
+  if(!window.isSecureContext)toast('Open this app from its https link.',6000);
+}
+boot();
+})();
+</script>
+</body>
+</html>
