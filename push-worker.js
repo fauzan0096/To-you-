@@ -1,5 +1,5 @@
 /*
-  Connective push relay (Cloudflare Worker).
+  To you push relay (Cloudflare Worker).
   It only wakes a phone up. It never sees chats or call audio.
   Needs one KV namespace bound with the variable name:  KV
 */
@@ -55,6 +55,15 @@ async function encrypt(keys, plain) {
   return cat(hdr, ct);
 }
 
+let turnCache = null; // shared TURN credentials, refreshed hourly
+const ipHits = new Map();
+function ipLimited(ip) {
+  const now = Date.now(), a = (ipHits.get(ip) || []).filter((t) => now - t < 3600000);
+  a.push(now); ipHits.set(ip, a);
+  if (ipHits.size > 5000) ipHits.clear();
+  return a.length > 120;
+}
+
 const hits = new Map(); // best-effort rate limit per token (resets when the worker restarts)
 function limited(tok) {
   const now = Date.now(), a = (hits.get(tok) || []).filter((t) => now - t < 60000);
@@ -79,7 +88,41 @@ export default {
     const url = new URL(req.url), path = url.pathname.replace(/\/+$/, '');
     try {
       if (req.method === 'GET' && path === '/vapid') return out((await getVapid(env)).pub, 200, { 'content-type': 'text/plain' });
-      if (req.method === 'GET' && (path === '' || path === '/')) return out('Connective push relay is running.', 200, { 'content-type': 'text/plain' });
+      // Free TURN relay credentials from Cloudflare, so calls connect on any network (uses port 443/TLS too)
+      if (req.method === 'GET' && path === '/turn') {
+        if (!env.TURN_KEY_ID || !env.TURN_KEY_TOKEN) return out('turn not set up', 404);
+        if (ipLimited(req.headers.get('cf-connecting-ip') || 'x')) return out('slow down', 429);
+        if (!turnCache || Date.now() - turnCache.t > 3600000) {
+          const r = await fetch('https://rtc.live.cloudflare.com/v1/turn/keys/' + encodeURIComponent(env.TURN_KEY_ID) + '/credentials/generate-ice-servers', {
+            method: 'POST', headers: { Authorization: 'Bearer ' + env.TURN_KEY_TOKEN, 'content-type': 'application/json' }, body: JSON.stringify({ ttl: 86400 }),
+          });
+          if (!r.ok) return out('turn error ' + r.status, 502);
+          const j = await r.json();
+          // port 53 is blocked by browsers and only causes delays
+          const servers = (j.iceServers || []).map((x) => ({ ...x, urls: (Array.isArray(x.urls) ? x.urls : [x.urls]).filter((u) => !/:53(\?|$)/.test(u)) })).filter((x) => x.urls.length);
+          turnCache = { t: Date.now(), body: JSON.stringify({ iceServers: servers }) };
+        }
+        return out(turnCache.body, 200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+      }
+
+      // Messages: pass-through to ntfy for networks where ntfy.sh itself is blocked or breaks streaming
+      const nm = /^\/n\/(pc[a-z2-7]{20,40})(\/sse)?$/.exec(path);
+      if (nm) {
+        const base = (env.NTFY_BASE || 'https://ntfy.sh').replace(/\/+$/, '');
+        if (nm[2] && req.method === 'GET') {
+          const since = /^[0-9a-z]{1,20}$/.test(url.searchParams.get('since') || '') ? url.searchParams.get('since') : '12h';
+          const r = await fetch(base + '/' + nm[1] + '/sse?since=' + since, { headers: { accept: 'text/event-stream' } });
+          return new Response(r.body, { status: r.status, headers: { ...CORS, 'content-type': 'text/event-stream', 'cache-control': 'no-cache, no-transform', 'x-accel-buffering': 'no' } });
+        }
+        if (!nm[2] && req.method === 'POST') {
+          const t = await req.text();
+          if (t.length > 8000) return out('too big', 413);
+          const r = await fetch(base + '/' + nm[1], { method: 'POST', body: t });
+          return out(r.ok ? '{}' : 'upstream ' + r.status, r.ok ? 200 : 502);
+        }
+      }
+
+      if (req.method === 'GET' && (path === '' || path === '/')) return out('To you push relay is running.', 200, { 'content-type': 'text/plain' });
 
       if (req.method === 'POST' && path === '/register') {
         const b = await json(req);

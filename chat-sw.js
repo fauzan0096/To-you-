@@ -1,7 +1,7 @@
-/* Connective service worker. Own cache name, only touches its own files. */
-const P='connective-',C=P+'v4',F=['chat.html','chat-manifest.json','chat-192.png','chat-512.png','chat-apple-180.png','chat-maskable-512.png'];
+/* To you service worker. Own cache name, only touches its own files. */
+const P='toyou-',C=P+'v1',F=['chat.html','chat-manifest.json','chat-192.png','chat-512.png','chat-apple-180.png','chat-maskable-512.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>Promise.all(F.map(f=>c.add(new Request(f,{cache:'no-store'})).catch(()=>{})))));self.skipWaiting();});
-self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x.startsWith(P)&&x!==C).map(x=>caches.delete(x)))).then(()=>self.clients.claim()));});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>(x.startsWith(P)||x.startsWith('connective-'))&&x!==C).map(x=>caches.delete(x)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',e=>{
   const u=new URL(e.request.url);
   if(e.request.method!=='GET'||u.origin!==location.origin)return;

@@ -6,13 +6,13 @@
 <meta name="theme-color" content="#0a1224">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Connective">
+<meta name="apple-mobile-web-app-title" content="To you">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="robots" content="noindex">
 <link rel="manifest" href="chat-manifest.json">
 <link rel="icon" href="chat-192.png">
 <link rel="apple-touch-icon" href="chat-apple-180.png">
-<title>Connective</title>
+<title>To you</title>
 <style>
 :root{--bg:#0a1224;--pan:#0f1a33;--card:#15223f;--line:#243556;--fg:#eaf0fa;--mute:#8a9bb8;--acc:#34e0a1;--accd:#12385a;--in:#18274a;--bad:#ff6b6b;--warn:#f2b84b;--b1:#1d4fc4;--b2:#17877a;color-scheme:dark}
 [hidden]{display:none!important}
@@ -96,7 +96,7 @@ dialog::backdrop{background:#000a}
 <!-- PIN lock -->
 <section class="scr" id="lock" hidden>
   <img class="hero" src="chat-192.png" alt="">
-  <h1 style="margin:0">Connective</h1>
+  <h1 style="margin:0">To you</h1>
   <p class="note" id="lockmsg">Enter your PIN</p>
   <input type="password" id="lockpin" inputmode="numeric" autocomplete="off" style="max-width:220px;text-align:center;font-size:24px" aria-label="PIN">
   <button class="btn" id="lockok" type="button">Open</button>
@@ -106,7 +106,7 @@ dialog::backdrop{background:#000a}
 <section class="scr" id="setup" hidden>
   <div class="body">
     <img class="hero" src="chat-192.png" alt="">
-    <h1 style="margin:0 0 4px;text-align:center">Connective</h1>
+    <h1 style="margin:0 0 4px;text-align:center">To you</h1>
     <p class="note" id="invite" hidden style="color:var(--acc);text-align:center"></p>
     <p class="note">Private messages, voice calls and video calls for your family. Nobody in the middle can read them.</p>
     <label for="myname">Your name (your family will see this)</label>
@@ -118,7 +118,7 @@ dialog::backdrop{background:#000a}
 
 <!-- chat list -->
 <section class="scr" id="list" hidden>
-  <header><img class="logo" src="chat-192.png" alt=""><h1>Connective<span class="sub"><i class="dot" id="cdot"></i><span id="conn">connecting…</span></span></h1>
+  <header><img class="logo" src="chat-192.png" alt=""><h1>To you<span class="sub"><i class="dot" id="cdot"></i><span id="conn">connecting…</span></span></h1>
     <button class="ib" id="toSettings" type="button" aria-label="Settings">⚙</button></header>
   <div class="body" id="rows"></div>
   <button class="fab" id="toAdd" type="button">+ Add person</button>
@@ -166,14 +166,14 @@ dialog::backdrop{background:#000a}
       <p class="note" id="instnote">In Chrome: tap ⋮ (menu), then <b>Install app</b> or <b>Add to Home screen</b>.</p>
       <div class="btns"><button class="btn" id="install" type="button" hidden>Install app</button><button class="btn s" id="notif" type="button">Allow notifications</button></div></div>
     <div class="card"><h2>Ring me when the app is closed</h2>
-      <p class="note">Your phone shows a real notification for calls and messages even when Connective is closed. No extra app needed. It needs a free relay, one person sets it up (see PUSH-SETUP.md) and everyone uses the same address.</p>
+      <p class="note">Your phone shows a real notification for calls and messages even when To you is closed. No extra app needed. It needs a free relay, one person sets it up (see PUSH-SETUP.md) and everyone uses the same address.</p>
       <label for="pushurl">Relay address</label>
       <input type="url" id="pushurl" placeholder="https://connective-push.yourname.workers.dev" autocomplete="off">
       <div class="btns"><button class="btn" id="pushon" type="button">Turn on</button><button class="btn s" id="pushoff" type="button" hidden>Turn off</button></div>
       <p class="note" id="pushstat"></p>
-      <p class="note">iPhone: first tap Share, then Add to Home Screen, and open Connective from there.</p>
+      <p class="note">iPhone: first tap Share, then Add to Home Screen, and open To you from there.</p>
       <details style="margin-top:10px"><summary class="note" style="cursor:pointer">Other way: ntfy app</summary>
-      <p class="note">Without this, the other person's phone only rings while Connective is open. To get a real ring even when it is closed, install the free <b>ntfy</b> app (Play Store or App Store) and follow these steps.</p>
+      <p class="note">Without this, the other person's phone only rings while To you is open. To get a real ring even when it is closed, install the free <b>ntfy</b> app (Play Store or App Store) and follow these steps.</p>
       <label style="display:flex;gap:10px;align-items:center;text-transform:none;font-size:15px;color:var(--fg);margin:0"><input type="checkbox" id="wakeon" style="width:22px;height:22px"> Let my contacts ring my phone</label>
       <ol class="note" style="padding-left:20px"><li>Install <b>ntfy</b> and open it.</li><li>Tap <b>+</b>, paste this topic name exactly, and subscribe:</li></ol>
       <div class="link" id="wakeid">turn it on first</div>
@@ -181,6 +181,8 @@ dialog::backdrop{background:#000a}
       <p class="note">3. In your phone settings, allow ntfy notifications and sound. Then tap a "calling" notification to open the call.</p>
       <p class="note warn">Privacy: this tells the free ntfy server that someone is calling you (their name and the time). Chats and calls stay locked.</p></details></div>
     <div class="card"><h2>Calls that will not connect</h2>
+      <label style="display:flex;gap:10px;align-items:center;text-transform:none;font-size:15px;color:var(--fg);margin:0 0 6px"><input type="checkbox" id="forcerelay" style="width:22px;height:22px"> Always use the relay (works on every network)</label>
+      <p class="note">If you set the relay address above, To you gets a free call relay from it automatically. Turn this on if calls still fail on one network.</p>
       <label style="display:flex;gap:10px;align-items:center;text-transform:none;font-size:15px;color:var(--fg);margin:0"><input type="checkbox" id="usepub" style="width:22px;height:22px"> Use the free public relay</label>
       <p class="note">Some phone networks block direct calls. A relay passes the call along. It still cannot hear it, the call stays encrypted. The free public one is not always reliable.</p>
       <div class="btns"><button class="btn" id="nettest" type="button">Check my network</button></div>
@@ -245,7 +247,7 @@ let contacts=ls.get('pc_contacts',{});    // keyId -> {id,name,pk,ib,st:'ok'|'re
 let msgs=ls.get('pc_msgs',{});            // keyId -> [{id,o,x,ts,ok,sys}]
 let unread=ls.get('pc_unread',{});
 let blocked=ls.get('pc_blocked',[]);
-let cfg=Object.assign({srv:DEF_SRV,usepub:true,turn:{url:'',user:'',pass:''},pin:'',salt:'',wake:false,push:{url:'',on:false}},ls.get('pc_cfg',{}));
+let cfg=Object.assign({srv:DEF_SRV,usepub:true,turn:{url:'',user:'',pass:''},pin:'',salt:'',wake:false,relayonly:false,push:{url:'',on:false}},ls.get('pc_cfg',{}));
 let lastTs=ls.get('pc_last',0);
 let seen=ls.get('pc_seen',[]);
 const save={me:()=>ls.set('pc_me',me),c:()=>ls.set('pc_contacts',contacts),m:()=>{for(const k in msgs)if(msgs[k].length>400)msgs[k]=msgs[k].slice(-400);ls.set('pc_msgs',msgs);},u:()=>ls.set('pc_unread',unread),cfg:()=>ls.set('pc_cfg',cfg),b:()=>ls.set('pc_blocked',blocked)};
@@ -303,8 +305,15 @@ async function openEnv(env,pk){
 /* ---------- transport (ntfy-style publish/subscribe) ---------- */
 const CH=2800;
 async function publish(topic,str){
-  const r=await fetch(cfg.srv.replace(/\/+$/,'')+'/'+topic,{method:'POST',body:str});
-  if(!r.ok)throw new Error('http '+r.status);
+  const alt=altURL(),bases=[cfg.srv.replace(/\/+$/,'')];if(alt)bases.push(alt);if(useAlt&&alt)bases.reverse();
+  let last;
+  for(const b of bases){
+    try{const ac=new AbortController(),t=setTimeout(()=>ac.abort(),12000);
+      const r=await fetch(b+'/'+topic,{method:'POST',body:str,signal:ac.signal});clearTimeout(t);
+      if(!r.ok)throw new Error('http '+r.status);useAlt=!!alt&&b===alt;return;
+    }catch(e){last=e;}
+  }
+  throw last;
 }
 async function sendTo(c,obj,withKey){
   const w=await seal(c.pk,obj,withKey);
@@ -312,16 +321,24 @@ async function sendTo(c,obj,withKey){
   const id=rnd(6),n=Math.ceil(w.length/CH);
   for(let i=0;i<n;i++)await publish(c.ib,JSON.stringify({p:[id,i,n],d:w.slice(i*CH,(i+1)*CH)}));
 }
-let es=null,esTimer=null,connOK=false;
+let es=null,esTimer=null,connOK=false,useAlt=false,errRun=0,lastEv=0;
+/* If ntfy.sh is blocked or buffered on this network, the same messages go through your relay address instead. */
+const altURL=()=>(cfg.srv===DEF_SRV&&/^https?:\/\//.test(pushURL()))?pushURL()+'/n':'';
 function setConn(ok,t){connOK=ok;$('conn').textContent=t||(ok?'connected':'connecting…');$('cdot').classList.toggle('on',!!ok);}
 function subscribe(){
   if(!me)return;clearTimeout(esTimer);try{es&&es.close();}catch(e){}
+  const alt=altURL(),base=((useAlt&&alt)?alt:cfg.srv).replace(/\/+$/,'');
   const since=lastTs?String(lastTs):'12h';
-  try{es=new EventSource(cfg.srv.replace(/\/+$/,'')+'/'+me.inbox+'/sse?since='+since);}catch(e){setConn(false,'server address is wrong');return;}
-  es.onopen=()=>setConn(true);
-  es.onmessage=ev=>{try{const d=JSON.parse(ev.data);if(d.event==='message'&&d.message)onWire(d);}catch(e){}};
-  es.onerror=()=>{setConn(false,'reconnecting…');try{es.close();}catch(e){}esTimer=setTimeout(subscribe,3000);};
+  let mine;
+  try{mine=es=new EventSource(base+'/'+me.inbox+'/sse?since='+since);}catch(e){setConn(false,'server address is wrong');return;}
+  lastEv=Date.now();
+  mine.onopen=()=>{errRun=0;lastEv=Date.now();setConn(true);};
+  mine.onmessage=ev=>{lastEv=Date.now();try{const d=JSON.parse(ev.data);if(d.event==='message'&&d.message)onWire(d);}catch(e){}};
+  mine.addEventListener('keepalive',()=>{lastEv=Date.now();});
+  mine.onerror=()=>{if(es!==mine)return;errRun++;if(errRun>=2&&alt){useAlt=!useAlt;errRun=0;}setConn(false,'reconnecting…');try{mine.close();}catch(e){}esTimer=setTimeout(subscribe,3000);};
 }
+/* some networks keep the connection open but stop delivering: reconnect if it goes silent */
+setInterval(()=>{if(me&&es&&connOK&&Date.now()-lastEv>100000)subscribe();},20000);
 const parts={};
 function onWire(d){
   const id=d.id;if(id&&seen.includes(id))return;
@@ -446,7 +463,7 @@ function myLink(){
 }
 $('toAdd').onclick=()=>{$('mylink').textContent=myLink();show('add');};
 $('copylink').onclick=async()=>{try{await navigator.clipboard.writeText(myLink());toast('Link copied');}catch(e){toast('Select the link and copy it by hand');}};
-$('sharelink').onclick=async()=>{const t='Chat with me privately on Connective. Open this link:\n'+myLink();
+$('sharelink').onclick=async()=>{const t='Chat with me privately on To you. Open this link:\n'+myLink();
   try{if(navigator.share){await navigator.share({text:t});return;}}catch(e){if(e&&e.name==='AbortError')return;}
   try{await navigator.clipboard.writeText(t);toast('Message copied. Paste it in WhatsApp.');}catch(e){toast('Copy the link above by hand');}};
 async function addFromCard(card){
@@ -489,12 +506,23 @@ let call=null;     // {cid,kid,pc,stream,video,dir,state,timer,start,facing}
 let pendingOffer=null;
 function iceServers(){
   const l=[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302','stun:stun.cloudflare.com:3478','stun:stun.nextcloud.com:443']}];
+  if(turnFresh())for(const x of cfg.tcache.s)l.push(x);
   if(cfg.mcache&&cfg.mcache.length)for(const x of cfg.mcache)l.push(x);
   if(cfg.turn.url)l.push({urls:cfg.turn.url.split(/[\s,]+/).filter(Boolean),username:cfg.turn.user,credential:cfg.turn.pass});
-  if(cfg.usepub)l.push({urls:['turn:openrelay.metered.ca:80','turn:openrelay.metered.ca:443','turns:openrelay.metered.ca:443?transport=tcp'],username:'openrelayproject',credential:'openrelayproject'});
+  if(cfg.usepub&&!turnFresh())l.push({urls:['turn:openrelay.metered.ca:80','turn:openrelay.metered.ca:443','turns:openrelay.metered.ca:443?transport=tcp'],username:'openrelayproject',credential:'openrelayproject'});
   return l;
 }
-async function refreshRelay(){
+const turnFresh=()=>!!(cfg.tcache&&cfg.tcache.s&&Date.now()-cfg.tcache.t<20*3600e3);
+async function refreshTurn(force){
+  const u=pushURL();if(!/^https?:\/\//.test(u))return;
+  if(!force&&cfg.tcache&&cfg.tcache.s&&Date.now()-cfg.tcache.t<6*3600e3)return;
+  try{const ac=new AbortController(),t=setTimeout(()=>ac.abort(),4000);
+    const r=await fetch(u+'/turn',{signal:ac.signal});clearTimeout(t);if(!r.ok)throw 0;
+    const j=await r.json();if(j&&Array.isArray(j.iceServers)&&j.iceServers.length){cfg.tcache={t:Date.now(),s:j.iceServers.filter(x=>x&&x.urls)};save.cfg();}
+  }catch(e){}
+}
+async function refreshRelay(force){await refreshTurn(force);return refreshMetered();}
+async function refreshMetered(){
   const m=cfg.metered;if(!m||!m.app||!m.key)return;
   try{
     const ac=new AbortController(),t=setTimeout(()=>ac.abort(),5000);
@@ -505,7 +533,7 @@ async function refreshRelay(){
 }
 async function netTest(){
   const out=$('netres');out.hidden=false;out.textContent='Checking… (about 8 seconds)';
-  await refreshRelay();
+  await refreshRelay(true);
   const n={host:0,srflx:0,relay:0};
   try{
     const pc=new RTCPeerConnection({iceServers:iceServers()});pc.createDataChannel('t');
@@ -516,7 +544,7 @@ async function netTest(){
   }catch(e){out.textContent='This browser cannot run the check. Open the app in Chrome or Safari.';return;}
   let msg='Direct address: '+(n.srflx?'found':'NOT found')+'\nRelay: '+(n.relay?'working':'NOT working')+'\n\n';
   if(n.relay)msg+='Good. Calls should connect on any network.';
-  else if(n.srflx)msg+='Calls may connect directly, but some Wi-Fi networks will fail. Add the free relay account above.';
+  else if(n.srflx)msg+='Calls may connect directly, but some Wi-Fi networks will fail. Set the relay address (Ring me when the app is closed) or add the free relay account above.';
   else msg+='This network blocks call setup. Try mobile data, or add the free relay account above.';
   out.style.whiteSpace='pre-wrap';out.textContent=msg;
 }
@@ -539,7 +567,16 @@ let rb=null;
 function startRingback(){stopRingback();try{const ac=new (window.AudioContext||window.webkitAudioContext)();const beep=()=>{const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=425;g.gain.value=.06;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+1);};beep();rb={ac,iv:setInterval(beep,4000)};}catch(e){}}
 function stopRingback(){if(rb){clearInterval(rb.iv);try{rb.ac.close();}catch(e){}rb=null;}}
 function stopRing(){stopRingback();if(ring){clearInterval(ring.iv);try{ring.ac.close();}catch(e){}ring=null;}try{navigator.vibrate&&navigator.vibrate(0);}catch(e){}}
-function gathered(pc){return new Promise(res=>{if(pc.iceGatheringState==='complete')return res();const t=setTimeout(res,5000);pc.addEventListener('icegatheringstatechange',()=>{if(pc.iceGatheringState==='complete'){clearTimeout(t);res();}});});}
+function gathered(pc){return new Promise(res=>{
+  if(pc.iceGatheringState==='complete')return res();
+  let done=false,relay=false;const t0=Date.now();
+  const fin=()=>{if(done)return;done=true;clearTimeout(tm);clearInterval(iv);pc.removeEventListener('icecandidate',oc);pc.removeEventListener('icegatheringstatechange',gc);res();};
+  const tm=setTimeout(fin,8000);
+  const oc=e=>{if(e.candidate&&/ typ relay/.test(e.candidate.candidate))relay=true;};
+  const gc=()=>{if(pc.iceGatheringState==='complete')fin();};
+  const iv=setInterval(()=>{if(relay&&Date.now()-t0>1500)fin();},250);
+  pc.addEventListener('icecandidate',oc);pc.addEventListener('icegatheringstatechange',gc);
+});}
 async function getMedia(video,facing){
   return navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:video?{facingMode:facing||'user',width:{ideal:640},height:{ideal:480}}:false});
 }
@@ -553,13 +590,13 @@ function mediaErr(e){
 function callUI(on){$('call').hidden=!on;if(!on){$('rv').srcObject=null;$('lv').srcObject=null;}}
 function setStat(t){$('cstat').textContent=t;}
 function setupPC(video){
-  const pc=new RTCPeerConnection({iceServers:iceServers()});
+  const pc=new RTCPeerConnection({iceServers:iceServers(),iceTransportPolicy:cfg.relayonly?'relay':'all'});
   call.pc=pc;
   pc.ontrack=e=>{const rv=$('rv');rv.srcObject=e.streams[0];if(e.track.kind==='video'){rv.style.visibility='visible';$('avbig').hidden=true;}const pl=rv.play&&rv.play();if(pl&&pl.catch)pl.catch(()=>{});};
   pc.onconnectionstatechange=()=>{
     if(!call||call.pc!==pc)return;const s=pc.connectionState;
     if(s==='connected'){stopRingback();call.state='up';call.start=call.start||Date.now();stopRing();tickTimer();}
-    if(s==='failed'){endCall('Could not connect. This Wi-Fi blocks direct calls. Open Settings, tap Check my network, and add the free relay account. Or try mobile data.',true);}
+    if(s==='failed'){endCall('Could not connect. This network blocks direct calls. Open Settings: set the relay address and turn on Always use the relay. Or try mobile data.',true);}
     if(s==='disconnected'){setStat('Connection weak…');setTimeout(()=>{if(call&&call.pc===pc&&pc.connectionState==='disconnected')endCall('Call dropped',true);},8000);}
   };
   call.stream.getTracks().forEach(t=>pc.addTrack(t,call.stream));
@@ -717,11 +754,13 @@ $('pushon').onclick=async()=>{cfg.push.url=$('pushurl').value.trim().replace(/\/
 $('pushoff').onclick=async()=>{$('pushoff').disabled=true;await pushOff();$('pushoff').disabled=false;renderPush();toast('Turned off');};
 
 /* ---------- settings ---------- */
-$('toSettings').onclick=()=>{$('wakeon').checked=!!cfg.wake;$('wakeid').textContent=cfg.wake?me.wk:'turn it on first';$('setname').value=me.name;$('usepub').checked=cfg.usepub;$('turnurl').value=cfg.turn.url;$('turnuser').value=cfg.turn.user;$('turnpass').value=cfg.turn.pass;$('mapp').value=(cfg.metered&&cfg.metered.app)||'';$('mkey').value=(cfg.metered&&cfg.metered.key)||'';$('srv').value=cfg.srv;$('myid').textContent='Your key code: '+me.id;renderPush();show('settings');};
+$('toSettings').onclick=()=>{$('wakeon').checked=!!cfg.wake;$('wakeid').textContent=cfg.wake?me.wk:'turn it on first';$('setname').value=me.name;$('usepub').checked=cfg.usepub;$('forcerelay').checked=!!cfg.relayonly;$('turnurl').value=cfg.turn.url;$('turnuser').value=cfg.turn.user;$('turnpass').value=cfg.turn.pass;$('mapp').value=(cfg.metered&&cfg.metered.app)||'';$('mkey').value=(cfg.metered&&cfg.metered.key)||'';$('srv').value=cfg.srv;$('myid').textContent='Your key code: '+me.id;renderPush();show('settings');};
 $('savename').onclick=async()=>{const n=$('setname').value.trim().slice(0,30);if(!n)return;me.name=n;save.me();toast('Saved. Others see the new name when you message them.');for(const k in contacts)if(contacts[k].st==='ok')sendTo(contacts[k],helloObj(),true).catch(()=>{});};
 $('wakeon').onchange=()=>{cfg.wake=$('wakeon').checked;save.cfg();$('wakeid').textContent=cfg.wake?me.wk:'turn it on first';for(const k in contacts)if(contacts[k].st==='ok')sendTo(contacts[k],helloObj(),true).catch(()=>{});toast(cfg.wake?'On. Now subscribe to the topic in the ntfy app.':'Off');};
 $('wakecopy').onclick=async()=>{if(!cfg.wake){toast('Turn it on first');return;}try{await navigator.clipboard.writeText(me.wk);toast('Topic copied');}catch(e){toast('Select the topic and copy it by hand');}};
 $('nettest').onclick=netTest;
+$('forcerelay').onchange=()=>{cfg.relayonly=$('forcerelay').checked;save.cfg();};
+$('pushurl').onchange=()=>{cfg.push.url=$('pushurl').value.trim().replace(/\/+$/,'');save.cfg();refreshRelay(true);};
 $('usepub').onchange=()=>{cfg.usepub=$('usepub').checked;save.cfg();};
 $('saveturn').onclick=()=>{cfg.metered={app:$('mapp').value.trim().replace(/\.metered\.live.*$/i,''),key:$('mkey').value.trim()};cfg.mcache=null;cfg.turn={url:$('turnurl').value.trim(),user:$('turnuser').value.trim(),pass:$('turnpass').value};save.cfg();toast('Saved');};
 $('savesrv').onclick=()=>{const v=$('srv').value.trim()||DEF_SRV;if(!/^https?:\/\//i.test(v)){toast('Address must start with https://');return;}cfg.srv=v;save.cfg();subscribe();toast('Saved');};
@@ -777,6 +816,7 @@ async function boot(){
 function startApp(){
   show('list');renderList();subscribe();checkHash();
   if(pushActive())pushOn(true);
+  refreshRelay();
   if(!window.isSecureContext)toast('Open this app from its https link.',6000);
 }
 boot();
